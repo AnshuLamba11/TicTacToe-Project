@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+		Ultimate Tic Tac Toe
+	</title>
+</head>
+<body>
+</body>
+</html>
+
+<script>
+var globalVariablesObj = {};
+var turnCount = [];
+var gridDisabled = [];
+
+var sqrInner = document.getElementsByName("inner");
+var sqrOuter = document.getElementsByName("outer");
+var cellsObj = {
+	0 : [0,1,2,3,4,5,6,7,8],
+	1 : [9,10,11,12,13,14,15,16,17],
+	2 : [18,19,20,21,22,23,24,25,26],
+	3 : [27,28,29,30,31,32,33,34,35],
+	4 : [36,37,38,39,40,41,42,43,44],
+	5 : [45,46,47,48,49,50,51,52,53],
+	6 : [54,55,56,57,58,59,60,61,62],
+	7 : [63,64,65,66,67,68,69,70,71],
+	8 : [72,73,74,75,76,77,78,79,80,81]
+}
+
+function innerGrid(rows, columns) {
+	var bodyElement = document.querySelector("body");
+	var table = document.createElement("table");	
+	for(var i = 0; i < rows; i++) {
+		var trTags = document.createElement("tr");
+		for(var j = 0; j < columns; j++) {
+			var tdTags = document.createElement("td");
+			tdTags.textContent = "";
+			tdTags.style.width = "40px";
+			tdTags.style.height = "40px";
+			tdTags.style.backgroundColor = "violet";
+			tdTags.style.textAlign = "center";
+			tdTags.setAttribute("name", "inner");
+			table.appendChild(trTags);
+			trTags.appendChild(tdTags);
+		}
+	}
+	return table;
+}
+
+function player(icon) {
+	this.icon = icon
+}
+
+var player1 = new player("X")
+var player2 = new player("0")
+
+
+function outerGrid() {
+	var body = document.querySelector("body")
+	var table = document.createElement("table")
+	body.appendChild(table);
+	var button1 = document.createElement("button");
+	var button2 = document.createElement("button");
+
+	button1.textContent = "Reset";
+	button1.onclick = resetButton;
+	button2.textContent = "Choose Player";
+	body.appendChild(button1);
+	body.appendChild(button2); 
+	var formField = document.createElement("form");
+	var divElement = document.createElement("div");
+	
+	button2.onclick = function(){
+		globalVariablesObj["userChoice"] = prompt("Choose your player ---- Player1 or Player2")
+		button2.disabled = true;
+	}
+	for(var i = 0; i < 3; i++){
+		var trTags = document.createElement("tr");
+		table.appendChild(trTags);
+		for(var j = 0; j < 3; j++) {
+			tdTags = document.createElement("td");
+			trTags.appendChild(tdTags);
+			tdTags.textContent = "";
+			tdTags.style.width = "120px";
+			tdTags.style.height = "120px";
+			tdTags.style.fontSize = "20px";
+			tdTags.style.color = "green";
+			tdTags.style.textAlign = "center";
+			tdTags.style.border = "thick solid #0000FF";
+			tdTags.setAttribute("name", "outer");
+			tdTags.appendChild(innerGrid(3,3));
+		}
+	}
+}	
+
+
+function turn(){
+	for(var i = 0; i < sqrInner.length; i++) {
+		sqrInner[i].onclick= function(){
+			this.tapped = true;
+			
+			if(this.innerHTML === "") {
+				if(globalVariablesObj["userChoice"].toLowerCase() === "player1") {
+					checkInnerGrid()
+					this.innerHTML = player1.icon
+					globalVariablesObj["userChoice"] = "";
+					turnCount.push(this.innerHTML);
+					move();
+				} else if(globalVariablesObj["userChoice"].toLowerCase() === "player2") {
+					checkInnerGrid()
+					this.innerHTML = player2.icon
+					globalVariablesObj["userChoice"] = "";
+					turnCount.push(this.innerHTML)
+					move();
+				} else if(turnCount[turnCount.length-1] === player1.icon) {
+					checkInnerGrid()
+					this.innerHTML = player2.icon
+					turnCount.push(this.innerHTML)
+					move();
+				} else {
+					checkInnerGrid()
+					this.innerHTML = player1.icon
+					turnCount.push(this.innerHTML)
+					move();
+				}
+			} 
+		}
+	}
+}				
+
+
+function move(){
+	for(var i = 0; i < sqrInner.length; i++){
+		if(sqrInner[i].tapped === true){
+			for(var j = 0; j < 9; j++){
+				if(arrayElement(i,cellsObj[j]) === true){
+					var x = cellsObj[j].indexOf(i);
+					var y = cellsObj[x];
+					disableCells(0,81,y[0],y[8]);
+					disableCellsBlue();
+					checkInnerGrid();
+					sqrInner[i].tapped = false; 
+					check2();
+					checkResult();
+					return;
+				}
+			}
+		}
+	}
+}
+
+
+function disableCells(i,j,k,l){
+	for(var b = i; b < j; b++) {
+		if(k<=b && b<=l){
+			sqrInner[b].style.backgroundColor = "violet";
+			sqrInner[b].onclick = reEnableCells;
+			continue;
+		}
+		sqrInner[b].onclick = null;
+		sqrInner[b].style.backgroundColor = "red";
+	}
+}					
+
+
+function arrayElement(arrayElement, array){
+	for(var i = 0; i < array.length; i++){
+		if(array[i] === arrayElement){
+			return true;
+		}
+	}
+}
+
+
+function reEnableCells(){
+	this.tapped = true; 
+	if(this.innerHTML === "") {
+		if(globalVariablesObj["userChoice"].toLowerCase() === "player1") {
+			this.innerHTML = player1.icon
+			globalVariablesObj["userChoice"] = "";
+			turnCount.push(this.innerHTML);
+			move();
+		} else if(globalVariablesObj["userChoice"].toLowerCase() === "player2") {
+			this.innerHTML = player2.icon
+			globalVariablesObj["userChoice"] = "";
+			turnCount.push(this.innerHTML)
+			move();
+		} else if(turnCount[turnCount.length-1] === player1.icon) {
+			this.innerHTML = player2.icon
+			turnCount.push(this.innerHTML)
+			move();
+		} else {
+			this.innerHTML = player1.icon
+			turnCount.push(this.innerHTML)
+			move();
+		}
+	} 
+}
+
+
+var winningCombinationArray = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+
+
+function checkInnerGrid(){
+	for(var j = 0; j < 9; j++){
+		for(var i = 0; i < winningCombinationArray.length; i++){
+			if((sqrInner[cellsObj[j][winningCombinationArray[i][0]]].innerHTML == sqrInner[cellsObj[j][winningCombinationArray[i][1]]].innerHTML) && (sqrInner[cellsObj[j][winningCombinationArray[i][1]]].innerHTML == sqrInner[cellsObj[j][winningCombinationArray[i][2]]].innerHTML) && (sqrInner[cellsObj[j][winningCombinationArray[i][0]]].innerHTML) !== ""){
+				for(var z = 0; z < 9; z++){
+					sqrInner[cellsObj[j][z]].onclick = null;
+					if(sqrInner[cellsObj[j][winningCombinationArray[i][0]]].innerHTML === player1.icon){
+						sqrInner[cellsObj[j][z]].style.backgroundColor = "blue";
+					} else if(sqrInner[cellsObj[j][winningCombinationArray[i][0]]].innerHTML === player2.icon){
+						sqrInner[cellsObj[j][z]].style.backgroundColor = "yellow";
+					}
+					gridDisabled.push([cellsObj[j][z]]);
+				}
+			}
+		}
+	}
+	return;
+}
+
+
+
+function enableAllCells(){
+	for(var i = 0; i < sqrInner.length; i++){
+		if(sqrInner[i].style.backgroundColor === "blue" || sqrInner[i].style.backgroundColor === "yellow"){
+			continue;
+		} else {
+			sqrInner[i].style.backgroundColor = "violet";
+			sqrInner[i].onclick = reEnableCells;
+		}
+	}
+}
+
+
+function check2(){
+	for(var i = 0; i < sqrInner.length; i++){
+		if(sqrInner[i].style.backgroundColor === "violet"){
+			return;
+		} 
+
+	}
+	enableAllCells();
+	return;
+}
+
+function disableCellsBlue(){
+	for(var i = 0; i < sqrInner.length; i++){
+		if(arrayElement(sqrInner[i],gridDisabled)){
+			sqrInner[i].onclick = null;
+		}
+		return;
+	}
+}
+
+function resetButton() {
+	for(var i = 0; i < sqrInner.length; i++) {
+		sqrInner[i].innerHTML = "";
+		sqrInner[i].style.backgroundColor = "violet";
+		sqrInner[i].onclick = reEnableCells;
+	}
+	button2.disabled = false;
+}
+
+
+
+function checkResult(){
+	for(var i = 0; i < winningCombinationArray.length; i++){
+
+		if(((sqrInner[cellsObj[winningCombinationArray[i][0]][0]].style.backgroundColor === "yellow" && sqrInner[cellsObj[winningCombinationArray[i][1]][0]].style.backgroundColor === "yellow") && (sqrInner[cellsObj[winningCombinationArray[i][1]][0]].style.backgroundColor === "yellow" && sqrInner[cellsObj[winningCombinationArray[i][2]][0]].style.backgroundColor === "yellow")) || ((sqrInner[cellsObj[winningCombinationArray[i][0]][0]].style.backgroundColor === "blue" && sqrInner[cellsObj[winningCombinationArray[i][1]][0]].style.backgroundColor === "blue") && (sqrInner[cellsObj[winningCombinationArray[i][1]][0]].style.backgroundColor === "blue" && sqrInner[cellsObj[winningCombinationArray[i][2]][0]].style.backgroundColor === "blue"))){
+			if(sqrInner[cellsObj[winningCombinationArray[i][0]][0]].style.backgroundColor === "yellow"){
+				alert("Player 2 Wins");
+				resetButton(); 
+				return;
+			} else if(sqrInner[cellsObj[winningCombinationArray[i][0]][0]].style.backgroundColor === "blue"){
+				alert("Player 1 wins")
+				resetButton(); 
+				return;
+			} else {
+				return;
+			}
+		}
+	}
+}
+
+
+
+
+outerGrid();
+turn();
+</script>
